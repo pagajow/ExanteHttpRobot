@@ -20,6 +20,8 @@ class ExanteApi:
         self.auth = HTTPBasicAuth(username=self.applicationID, password=self.accessKey)
         self.cmds = Commands(auth=self.auth, account=self.account, version=self.version)
 
+    def checkAccount(self):
+        return self.cmds.getUserAccounts()
 
     def onData(self, data: bytes):
         print(data)

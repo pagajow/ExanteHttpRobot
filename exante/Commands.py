@@ -34,6 +34,7 @@ class Commands:
         """
         url = "".join([self.urlMd(), "accounts"])
         response = requests.get(url=url, auth=self.auth)
+
         return response
 
     def getAllDailyChanges(self):
