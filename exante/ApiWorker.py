@@ -8,8 +8,9 @@ class ApiWorker(Thread):
         self.function = function
         self.args = args
         self.kwargs = kwargs
+        self.name = self.function.__name__
 
     def run(self) -> None:
-        print("START: %s".format(threading.current_thread().name))
+        print("START: %{0}".format(threading.current_thread().name))
         self.function(*self.args, **self.kwargs)
-        print("END: %s".format(threading.current_thread().name))
+        print("END: %{0}".format(threading.current_thread().name))

@@ -1,13 +1,20 @@
 from tkinter import *
 from typing import Callable
 
+from exante.ApiWorker import ApiWorker
 from exante.ExanteApi import ExanteApi
 
 
 class LoginWindow(Frame):
 
-    def __init__(self, master: Frame, onLogin: Callable[[ExanteApi], None]):
+    def __init__(self, master: Frame, onLogin: Callable[[ExanteApi], None], applicationID: str=None, accessKey: str=None):
         Frame.__init__(self, master, padx=20, pady=20)
+
+        if applicationID is None:
+            applicationID = ""
+        if accessKey is None:
+            accessKey = ""
+
         self.onLogin = onLogin
 
         # application ID entry:
@@ -18,7 +25,7 @@ class LoginWindow(Frame):
         self.appIdLabel.grid(row=0, column=0)
 
         self.appIdValue = StringVar()
-        self.appIdValue.set("")
+        self.appIdValue.set(applicationID)
         self.appIdEntry = Entry(master=self.appIdRow, width=40, textvariable=self.appIdValue)
         self.appIdEntry.grid(row=0, column=1)
 
@@ -30,7 +37,7 @@ class LoginWindow(Frame):
         self.accessKeyLabel.grid(row=0, column=0)
 
         self.accessKeyValue = StringVar()
-        self.accessKeyValue.set("")
+        self.accessKeyValue.set(accessKey)
         self.accessKeyEntry = Entry(master=self.accessKeyRow, width=40, textvariable=self.accessKeyValue)
         self. accessKeyEntry.grid(row=0, column=1)
 
@@ -44,17 +51,24 @@ class LoginWindow(Frame):
         self.loginBtn = Button(master=self.buttonRow, text="Login", height=1, width=10, command=self.onLoginPress, padx=10)
         self.loginBtn.grid(row=0, column=1)
 
-
     def onLoginPress(self):
         print("onLogin")
-        aepi = ExanteApi(applicationID=self.appIdValue.get(), accessKey= self.accessKeyValue.get())
-        response = aepi.checkAccount()
-        if response.status_code == 200:
-            self.onLogin(aepi)
-            self.master.destroy()
-        else:
-            self.onLogin(None)
+        if len(self.appIdValue.get()) > 0 and len(self.accessKeyValue.get()) > 0:
+            self.loginBtn.configure(state='disabled')
+
+            aepi = ExanteApi(applicationID=self.appIdValue.get(), accessKey= self.accessKeyValue.get())
+
+            def tryToLogin():
+                response = aepi.checkAccount()
+                self.loginBtn.configure(state='normal')
+                if response.status_code == 200:
+                    self.destroy()
+                    self.onLogin(aepi)
+                else:
+                    self.onLogin(None)
+
+            ApiWorker(function=tryToLogin).start()
+
 
     def onCancelPress(self):
-        print("onCancel")
         self.master.destroy()
